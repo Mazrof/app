@@ -1,25 +1,33 @@
 services:
-  # backend:
-  #   build: ./back
-  #   ports:
-  #     - "3000:3000"
+  backend:
+    build:
+      context: back
+    ports:
+      - "3000:3000"
 
-  #   networks:
-  #     - back-network
+    networks:
+      - back-network
 
-  #   environment:
-  #     - DATABASE_URL: ${DATABASE_URL}
-  #     - FIREBASE_API_KEY: ${FIREBASE_API_KEY}
-  #     - FIREBASE_AUTH_DOMAIN: ${FIREBASE_AUTH_DOMAIN}
-  #     - FIREBASE_PROJECT_ID: ${FIREBASE_PROJECT_ID}
-  #     - FIREBASE_STORAGE_BUCKET: ${FIREBASE_STORAGE_BUCKET}
-  #     - FIREBASE_MESSAGING_SENDER_ID: ${FIREBASE_MESSAGING_SENDER_ID}
-  #     - FIREBASE_APP_ID: ${FIREBASE_APP_ID}
-  #     - FIREBASE_MEASUREMENT_ID: ${FIREBASE_MEASUREMENT_ID}
-  #     - NODE_ENV: ${NODE_ENV}
+    environment:
+      - DATABASE_URL=postgres://mazrof:mazrof@database:5432/mazrof
+      - FIREBASE_APIKEY=${FIREBASE_APIKEY}
+      - FIRBASE_AUTHDOMAIN=${FIRBASE_AUTHDOMAIN}
+      - FIREBASE_PROJECT_ID=${FIREBASE_PROJECT_ID}
+      - FIREBASE_STORAGE_BUCKET=${FIREBASE_STORAGE_BUCKET}
+      - FIREBASE_MESSAGING_SENDER_ID=${FIREBASE_MESSAGING_SENDER_ID}
+      - FIREBASE_APP_ID=${FIREBASE_APP_ID}
+      - FIREBASE_MEASUREMENT_ID=${FIREBASE_MEASUREMENT_ID}
+      - NODE_ENV=${NODE_ENV}
 
-  #   depends_on:
-  #     - database
+    depends_on:
+      - database
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
 
   database:
     image: postgres:alpine3.20
@@ -35,6 +43,12 @@ services:
       - POSTGRES_PASSWORD=mazrof
       - POSTGRES_USER=mazrof
       - POSTGRES_DB=mazrof
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-U" , "mazrof" ,"-d", "mazrof"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
 
   admin:
     image: dpage/pgadmin4:8
